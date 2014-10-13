@@ -1,0 +1,100 @@
+#!/usr/bin/env node
+
+var supergenpass = require('supergenpass-lib');
+
+// Parse options.
+var opts = require('nomnom').options({
+  uri : {
+    position  : 0,
+    required  : true,
+    help      : 'URI to generate a password for.',
+  },
+  secret : {
+    abbr    : 's',
+    default : process.env.SGP_SECRET || '',
+    metavar : 'SECRET',
+    help    : 'A secret password to be appended to the master password before generating the password.'
+  },
+  length_ : {
+    abbr    : 'l',
+    full    : 'length',
+    metavar : 'LENGTH',
+    default : process.env.SGP_LENGTH || '20',
+    help    : 'Length of the generated password. Valid lengths are integers between 4 and 24 inclusive.'
+  },
+  md5 : {
+    abbr    : 'm',
+    flag    : false,
+    default : process.env.SGP_METHOD === 'md5',
+    help    : 'Use MD5 method instead of SHA512.',
+  },
+  removeSubDomains : {
+    abbr    : 'r',
+    full    : 'remove-subdomains',
+    flag    : true,
+    default : process.env.SGP_REMOVE_SUBDOMAINS !== 'false',
+    help    : 'Remove subdomains from the hostname before generating the password?',
+  },
+  masterPassword : {
+    abbr    : 'm',
+    full    : 'master-password',
+    metavar : 'PASSWORD',
+    help    : 'Master password to use. BE CAREFUL WITH THIS OPTION!',
+  },
+  verify : {
+    abbr    : 'v',
+    flag    : true,
+    default : true,
+    help    : 'Verify master password (only when prompted).',
+  }
+})
+.script('supergenpass')
+/* jshint multistr: true */
+.help('If no master password is provided with -m/--master-password\n\
+or $SGP_MASTER_PASSWORD, you will be prompted for one.\n\n\
+The -s/--secret option could be used to encode a username into\n\
+the generated password, so you can register multiple usernames\n\
+with one website and get a unique password for each.')
+.parse();
+
+// Function that generates and outputs the generated password.
+function genPass(masterpw) {
+  console.log(
+    supergenpass(masterpw, opts.uri, {
+      secret           : opts.secret,
+      length           : Number(opts.length_),
+      method           : opts.method,
+      removeSubDomains : opts.removeSubDomains,
+    })
+  );
+}
+
+// Check if we have a master password.
+var masterpw = opts.masterPassword || process.env.SGP_MASTER_PASSWORD;
+if (! masterpw) {
+  var read     = require('read');
+  var readOpts = {
+    prompt: 'Master password: ',
+    silent: true,
+    output: process.stderr
+  };
+
+  read(readOpts, function(err, masterpw) {
+    if (err) throw err;
+    if (opts.verify) {
+      readOpts.prompt = 'Master password again: ';
+      read(readOpts, function(err, masterpw2) {
+        if (err) throw err;
+        if (masterpw !== masterpw2) {
+          console.error('\nERROR: master password mismatch.');
+          process.exit(1);
+        }
+        genPass(masterpw);
+      });
+    } else {
+      genPass(masterpw);
+    }
+  });
+} else {
+  genPass(masterpw);
+}

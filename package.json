@@ -1,0 +1,16 @@
+{
+  "name": "supergenpass-cli",
+  "version": "1.0.0",
+  "description": "CLI tool wrapping supergenpass-lib",
+  "bin": "./bin/supergenpass",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Robert Klep <robert@klep.name>",
+  "license": "ISC",
+  "dependencies": {
+    "nomnom": "^1.8.0",
+    "read": "^1.0.5",
+    "supergenpass-lib": "^1.0.0"
+  }
+}
