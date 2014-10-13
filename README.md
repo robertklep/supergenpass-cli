@@ -2,6 +2,14 @@
 
 This is a simple CLI script that wraps [supergenpass-lib](https://github.com/chriszarate/supergenpass-lib) to facilitate generating unique per-domain passwords.
 
+### Install:
+
+Until I publish to the NPM repo (if that ever happens):
+
+```
+$ npm install robertklep/supergenpass-cli -g
+```
+
 ### Usage:
 
 ```
